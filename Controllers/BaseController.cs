@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
+using Data.Models;
 
 namespace Data.Controllers
 {
@@ -20,17 +21,15 @@ namespace Data.Controllers
         }
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Base>>> Get()
+        public async Task<ActionResult<IEnumerable<Account>>> Get()
         {
-            return await db.Logins.ToListAsync();
-     
+            return await db.Logins.ToListAsync();   
         }
-
         // GET api/users/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Base>> Get(int id)
+        public async Task<ActionResult<Account>> Get(int id)
         {
-            Base user = await db.Logins.FirstOrDefaultAsync(x => x.Id == id);
+            Account user = await db.Logins.FirstOrDefaultAsync(x => x.Id == id);
             if (user == null)
                 return NotFound();
             return new ObjectResult(user);
@@ -38,33 +37,24 @@ namespace Data.Controllers
 
         // POST api/users
         [HttpPost]
-        public async Task<ActionResult<Base>> Post(Base user)
+        public async Task<ActionResult<Account>> Post(UserModel model)
         {
+            Account user = new Account();
+            user.Login = model.Login;
+            user.Password = model.Password;
+            user.Role = model.Role;
             if (user == null)
             {
                 return BadRequest();
-            }
-
-            string connectionString = "Server=(localdb)\\mssqllocaldb;Database=Users;Trusted_Connection=True;";
-            string sqlExpression = $"INSERT INTO logins (Login, Password, Role) VALUES ('{user.Login}', '{user.Password}', '{user.Role}')";
-            //string sqlExpression = $"SET IDENTITY_INSERT logins ON";
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-                SqlCommand command = new SqlCommand(sqlExpression, connection);
-                int number = command.ExecuteNonQuery();
-                await db.SaveChangesAsync();
-            }
-
-           //db.Logins.Add(user);
-           // await db.SaveChangesAsync();
+            }           
+            db.Logins.Add(user);
+           await db.SaveChangesAsync();
             return Ok(user);
         }
 
         // PUT api/users/
         [HttpPut]
-        public async Task<ActionResult<Base>> Put(Base user)
+        public async Task<ActionResult<Account>> Put(Account user)
         {
             if (user == null)
             {
@@ -82,9 +72,9 @@ namespace Data.Controllers
 
         // DELETE api/users/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Base>> Delete(int id)
+        public async Task<ActionResult<Account>> Delete(int id)
         {
-            Base user = db.Logins.FirstOrDefault(x => x.Id == id);
+            Account user = db.Logins.FirstOrDefault(x => x.Id == id);
             if (user == null)
             {
                 return NotFound();

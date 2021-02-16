@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Data.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -23,15 +24,14 @@ namespace Data.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SMS>>> Get()
         {
-            return await db.sMs.ToListAsync();
-
+            return await db.Sms.ToListAsync();
         }
 
         // GET api/users/5
         [HttpGet("{id}")]
         public async Task<ActionResult<SMS>> Get(int id)
         {
-            SMS user = await db.sMs.FirstOrDefaultAsync(x => x.Sender == id);
+            SMS user = await db.Sms.FirstOrDefaultAsync(x => x.Sender == id);
             if (user == null)
                 return NotFound();
             return new ObjectResult(user);
@@ -39,27 +39,20 @@ namespace Data.Controllers
 
         // POST api/users
         [HttpPost]
-        public async Task<ActionResult<SMS>> Post(SMS user)
+        public async Task<ActionResult<Account>> Post(SMSModel model)
         {
-            if (user == null)
+            SMS sms = new SMS();
+            sms.Sender = model.Sender;
+            sms.Sms = model.Sms;
+            sms.Recipient = model.Recipient;
+
+            if (sms == null)
             {
                 return BadRequest();
             }
-            string connectionString = "Server=(localdb)\\mssqllocaldb;Database=Users;Trusted_Connection=True;";
-            string sqlExpression = $"INSERT INTO sms (Sender, SMS, Recipient,Number) VALUES ('{user.Sender}', '{user.Sms}', '{user.Recipient}','{user.Number}')";
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-                SqlCommand command = new SqlCommand(sqlExpression, connection);
-                int number = command.ExecuteNonQuery();
-                await db.SaveChangesAsync();
-            }
-
-            //db.sMs.Add(user);
-            // await db.SaveChangesAsync();
-
-            return Ok(user);
+            db.Sms.Add(sms);
+            await db.SaveChangesAsync();
+            return Ok(sms);
         }
 
         // PUT api/users/
@@ -84,12 +77,12 @@ namespace Data.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<SMS>> Delete(int id)
         {
-            SMS user = db.sMs.FirstOrDefault(x => x.Id == id);
+            SMS user = db.Sms.FirstOrDefault(x => x.Id == id);
             if (user == null)
             {
                 return NotFound();
             }
-            db.sMs.Remove(user);
+            db.Sms.Remove(user);
             await db.SaveChangesAsync();
             return Ok(user);
         }

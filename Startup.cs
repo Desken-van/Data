@@ -34,12 +34,6 @@ namespace Data
             services.AddDbContext<UsersContext>(options => options.UseSqlServer(con));
             
             // установка конфигурации подключения
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                    .AddCookie(options => //CookieAuthenticationOptions
-        {
-                        options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
-                    });
-
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
